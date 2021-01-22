@@ -14,6 +14,8 @@
 #endif
 
 
+#define TIM_SYS		1
+
 // 用于应用程序“关于”菜单项的 CAboutDlg 对话框
 
 class CAboutDlg : public CDialogEx
@@ -69,6 +71,7 @@ BEGIN_MESSAGE_MAP(CAuroraDlg, CDialogEx)
 	ON_MESSAGE(WM_SHOWTASK, &CAuroraDlg::OnShowtask)
 	ON_WM_SIZE()
 	ON_WM_DESTROY()
+	ON_WM_TIMER()
 END_MESSAGE_MAP()
 
 
@@ -104,6 +107,9 @@ BOOL CAuroraDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 
 	// TODO: 在此添加额外的初始化代码
+	OpenConsole();
+	SetTimer(TIM_SYS, 1000, NULL);
+
 	OnInitNotifyIcon();
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
@@ -118,7 +124,7 @@ void CAuroraDlg::OnInitNotifyIcon()
 	m_nid.uFlags = NIF_ICON | NIF_MESSAGE | NIF_TIP;
 	m_nid.uCallbackMessage = WM_SHOWTASK; // 自定义的消息名称
 	m_nid.hIcon = LoadIcon(AfxGetInstanceHandle(), MAKEINTRESOURCE(IDR_MAINFRAME));
-	wcscpy_s(m_nid.szTip, L"服务器程序"); // 信息提示条为"服务器程序"，VS2008 UNICODE编码用wcscpy_s()函数
+	wcscpy_s(m_nid.szTip, L"流光溢彩"); // 信息提示条为"服务器程序"，VS2008 UNICODE编码用wcscpy_s()函数
 	Shell_NotifyIcon(NIM_ADD, &m_nid);// 在托盘区添加图标
 }
 
@@ -217,4 +223,31 @@ BOOL CAuroraDlg::DestroyWindow()
 	// 在托盘区删除图标
 	Shell_NotifyIcon(NIM_DELETE, &m_nid);
 	return CDialogEx::DestroyWindow();
+}
+
+
+void CAuroraDlg::OnTimer(UINT_PTR nIDEvent)
+{
+	// TODO: 在此添加消息处理程序代码和/或调用默认值
+	switch (nIDEvent)
+	{
+		case TIM_SYS:
+		{
+			CPoint   point;
+			int nScreenWidth, nScreenHeight;//保存分辨率
+			//获取分辨率
+			nScreenWidth = GetSystemMetrics(SM_CXSCREEN);
+			nScreenHeight = GetSystemMetrics(SM_CYSCREEN);
+			printf("分辨率:%d x %d \n", nScreenWidth, nScreenHeight);
+			point.x = nScreenWidth/2;
+			point.y = nScreenHeight/2;
+			// 再获取当前鼠标位置像素值
+			HDC hDC = ::GetDC(NULL);
+			COLORREF color = ::GetPixel(hDC, point.x, point.y);
+
+			printf("RGB(%d,%d,%d)\n", GetRValue(color), GetGValue(color), GetBValue(color));
+			break;
+		}
+	}
+	CDialogEx::OnTimer(nIDEvent);
 }
